@@ -1,4 +1,8 @@
-# env [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+# forms
+
+[![Go Reference](https://pkg.go.dev/badge/cattlecloud.net/go/forms.svg)](https://pkg.go.dev/cattlecloud.net/go/forms)
+[![License](https://img.shields.io/github/license/cattlecloud/forms?color=7C00D8&style=flat-square&label=License)](https://github.com/cattlecloud/forms/blob/main/LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/cattlecloud/forms/ci.yaml?style=flat-square&color=0FAA07&label=Tests)](https://github.com/cattlecloud/forms/actions/workflows/ci.yaml)
 
 `forms` provides a way to parse http Request forms using a schema
 
