@@ -25,6 +25,7 @@ linters:
    - musttag
    - nilnil
    - noctx
+   - paralleltest
    - perfsprint
    - prealloc
    - predeclared
