@@ -22,7 +22,21 @@ var (
 	ErrParseFailure    = errors.New("could not parse value")
 )
 
-func Parse(data url.Values, schema Schema) error {
+// Parse uses the given Schema to parse the HTTP form values in the given HTTP
+// Request. If the values of the form do not match the schema, or required values
+// are missing, an error is returned.
+func Parse(r *http.Request, schema Schema) error {
+	if err := r.ParseForm(); err != nil {
+		return err
+	}
+
+	return ParseValues(r.Form, schema)
+}
+
+// ParseValues uses the given Schema to parse the values in the given url.Values.
+// If the values do not match the schema, or required values are missing, an
+// error is returned.
+func ParseValues(data url.Values, schema Schema) error {
 	for name, parser := range schema {
 		values := data[name]
 		if err := parser.Parse(values); err != nil {
@@ -30,14 +44,6 @@ func Parse(data url.Values, schema Schema) error {
 		}
 	}
 	return nil
-}
-
-func ParseForm(r *http.Request, schema Schema) error {
-	if err := r.ParseForm(); err != nil {
-		return err
-	}
-
-	return Parse(r.Form, schema)
 }
 
 // A Schema describes how a set of url.Values should be parsed.
@@ -54,31 +60,18 @@ type Parser interface {
 	Parse([]string) error
 }
 
-// String is used to extract a form data value into a Go string. If the value
-// is not a string or is missing then an error is returned during parsing.
-func String(s *string) Parser {
-	return &stringParser{
-		required:    true,
-		destination: s,
-	}
+// StringType represents any type compatible with the Go string built-in type,
+// to be used as a destination for writing the value of an environment variable.
+type StringType interface {
+	~string
 }
 
-// StringOr is used to extract a form data value into a Go string. If the value
-// is missing, then the alt value is used instead.
-func StringOr(s *string, alt string) Parser {
-	*s = alt
-	return &stringParser{
-		required:    false,
-		destination: s,
-	}
-}
-
-type stringParser struct {
+type stringParser[T StringType] struct {
 	required    bool
-	destination *string
+	destination *T
 }
 
-func (p *stringParser) Parse(values []string) error {
+func (p *stringParser[T]) Parse(values []string) error {
 	switch {
 	case len(values) > 1:
 		return ErrMulitpleValues
@@ -87,9 +80,28 @@ func (p *stringParser) Parse(values []string) error {
 	case len(values) == 0:
 		return nil
 	default:
-		*p.destination = values[0]
+		*p.destination = T(values[0])
 	}
 	return nil
+}
+
+// String is used to extract a form data value into a Go string. If the value
+// is not a string or is missing then an error is returned during parsing.
+func String[T StringType](s *T) Parser {
+	return &stringParser[T]{
+		required:    true,
+		destination: s,
+	}
+}
+
+// StringOr is used to extract a form data value into a Go string. If the value
+// is missing, then the alt value is used instead.
+func StringOr[T StringType](s *T, alt T) Parser {
+	*s = alt
+	return &stringParser[T]{
+		required:    false,
+		destination: s,
+	}
 }
 
 // Secret is used to extract a form data value into a Go conceal.Text. If the
@@ -121,31 +133,19 @@ func (p *secretParser) Parse(values []string) error {
 	return nil
 }
 
-type intParser struct {
+// IntType represents any type compatible with the Go integer built-in types,
+// to be used as a destination for writing the value of a form value.
+type IntType interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+type intParser[T IntType] struct {
 	required    bool
-	destination *int
+	destination *T
 }
 
-// Int is used to extract a form data value into a Go int. If the value is not
-// an int or is missing then an error is returned during parsing.
-func Int(i *int) Parser {
-	return &intParser{
-		required:    true,
-		destination: i,
-	}
-}
-
-// IntOr is used to extract a form data value into a Go int. If the value is
-// missing, then the alt value is used instead.
-func IntOr(i *int, alt int) Parser {
-	*i = alt
-	return &intParser{
-		required:    false,
-		destination: i,
-	}
-}
-
-func (p *intParser) Parse(values []string) error {
+func (p *intParser[T]) Parse(values []string) error {
 	switch {
 	case len(values) > 1:
 		return ErrMulitpleValues
@@ -160,8 +160,27 @@ func (p *intParser) Parse(values []string) error {
 		return err
 	}
 
-	*p.destination = i
+	*p.destination = T(i)
 	return nil
+}
+
+// Int is used to extract a form data value into a Go int. If the value is not
+// an int or is missing then an error is returned during parsing.
+func Int[T IntType](i *T) Parser {
+	return &intParser[T]{
+		required:    true,
+		destination: i,
+	}
+}
+
+// IntOr is used to extract a form data value into a Go int. If the value is
+// missing, then the alt value is used instead.
+func IntOr[T IntType](i *T, alt T) Parser {
+	*i = alt
+	return &intParser[T]{
+		required:    false,
+		destination: i,
+	}
 }
 
 type floatParser struct {

@@ -14,6 +14,8 @@ import (
 )
 
 func Test_Parse_singles(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"one":   []string{"1"},
 		"two":   []string{"2"},
@@ -30,7 +32,7 @@ func Test_Parse_singles(t *testing.T) {
 		five  *conceal.Text
 	)
 
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"one":   String(&one),
 		"two":   Int(&two),
 		"three": Float(&three),
@@ -46,6 +48,8 @@ func Test_Parse_singles(t *testing.T) {
 }
 
 func Test_Parse_singles_Or(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"string1": []string{"hi"},
 		"string2": nil,
@@ -64,7 +68,7 @@ func Test_Parse_singles_Or(t *testing.T) {
 		b1, b2 bool
 	)
 
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"string1": StringOr(&s1, "X"),
 		"string2": StringOr(&s2, "X"),
 		"int1":    IntOr(&i1, 3),
@@ -87,6 +91,8 @@ func Test_Parse_singles_Or(t *testing.T) {
 }
 
 func Test_Parse_HTMLForm(t *testing.T) {
+	t.Parallel()
+
 	ctx := context.Background()
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, "/", nil)
 	must.NoError(t, err)
@@ -104,7 +110,7 @@ func Test_Parse_HTMLForm(t *testing.T) {
 		four  bool
 	)
 
-	err2 := ParseForm(request, Schema{
+	err2 := Parse(request, Schema{
 		"one":   String(&one),
 		"two":   Int(&two),
 		"three": Float(&three),
@@ -118,6 +124,8 @@ func Test_Parse_HTMLForm(t *testing.T) {
 }
 
 func Test_Parse_HTMLForm_optional(t *testing.T) {
+	t.Parallel()
+
 	ctx := context.Background()
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, "/", nil)
 	must.NoError(t, err)
@@ -130,7 +138,7 @@ func Test_Parse_HTMLForm_optional(t *testing.T) {
 		two string
 	)
 
-	err2 := ParseForm(request, Schema{
+	err2 := Parse(request, Schema{
 		"one": String(&one),
 		"two": StringOr(&two, "alternate"),
 	})
@@ -140,6 +148,8 @@ func Test_Parse_HTMLForm_optional(t *testing.T) {
 }
 
 func Test_Parse_HTMLForm_not_ready(t *testing.T) {
+	t.Parallel()
+
 	ctx := context.Background()
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, "/", nil)
 	must.NoError(t, err)
@@ -147,104 +157,194 @@ func Test_Parse_HTMLForm_not_ready(t *testing.T) {
 	var one string
 
 	// not yet a valid form, never had the FormValues field set
-	err2 := ParseForm(request, Schema{
+	err2 := Parse(request, Schema{
 		"one": String(&one),
 	})
 	must.Error(t, err2)
 }
 
 func Test_Parse_key_missing(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"one": []string{"1"},
 	}
 
 	var two int
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"two": Int(&two),
 	})
 	must.Error(t, err)
 }
 
 func Test_Parse_string_value_missing(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"one": []string{},
 	}
 
 	var one string
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"one": String(&one),
 	})
 	must.Error(t, err)
 }
 
 func Test_Parse_int_value_missing(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"two": []string{},
 	}
 
 	var two int
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"two": Int(&two),
 	})
 	must.Error(t, err)
 }
 
 func Test_Parse_int_malformed(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"two": []string{"not an int"},
 	}
 
 	var two int
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"two": Int(&two),
 	})
 	must.Error(t, err)
 }
 
 func Test_Parse_float_value_missing(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"three": []string{},
 	}
 
 	var three float64
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"three": Float(&three),
 	})
 	must.Error(t, err)
 }
 
 func Test_Parse_float_malformed(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"three": []string{"not a float"},
 	}
 
 	var three float64
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"three": Float(&three),
 	})
 	must.Error(t, err)
 }
 
 func Test_Parse_bool_value_missing(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"four": []string{},
 	}
 
 	var four bool
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"four": Bool(&four),
 	})
 	must.Error(t, err)
 }
 
 func Test_Parse_bool_malformed(t *testing.T) {
+	t.Parallel()
+
 	data := url.Values{
 		"four": []string{"not a bool"},
 	}
 
 	var four bool
-	err := Parse(data, Schema{
+	err := ParseValues(data, Schema{
 		"four": Bool(&four),
 	})
 	must.Error(t, err)
+}
+
+func Test_Parse_StringType_String(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"user": []string{"bob"},
+	}
+
+	type username string
+
+	var user username
+
+	err := ParseValues(data, Schema{
+		"user": String(&user),
+	})
+	must.NoError(t, err)
+	must.Eq(t, "bob", user)
+}
+
+func Test_Parse_StringType_StringOr(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"foo": []string{"bar"},
+	}
+
+	type username string
+
+	var user username
+	var fallback username = "alice"
+
+	err := ParseValues(data, Schema{
+		"user": StringOr(&user, fallback),
+	})
+	must.NoError(t, err)
+	must.Eq(t, "alice", user)
+}
+
+func Test_Parse_IntType_Int(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"age": []string{"34"},
+	}
+
+	type years int
+
+	var age years
+
+	err := ParseValues(data, Schema{
+		"age": Int(&age),
+	})
+	must.NoError(t, err)
+	must.Eq(t, 34, age)
+}
+
+func Test_Parse_IntType_IntOr(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"foo": []string{"bar"},
+	}
+
+	type years int
+
+	var age years
+	var fallback years = 100
+
+	err := ParseValues(data, Schema{
+		"age": IntOr(&age, fallback),
+	})
+	must.NoError(t, err)
+	must.Eq(t, 100, age)
 }
