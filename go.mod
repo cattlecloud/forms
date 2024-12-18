@@ -1,6 +1,6 @@
 module cattlecloud.net/go/forms
 
-go 1.23.4
+go 1.23
 
 require (
 	github.com/shoenig/go-conceal v0.5.4

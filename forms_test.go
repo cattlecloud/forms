@@ -1,7 +1,7 @@
 // Copyright (c) CattleCloud LLC
 // SPDX-License-Identifier: BSD-3-Clause
 
-package formdata
+package forms
 
 import (
 	"context"
