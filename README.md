@@ -14,6 +14,38 @@ The `forms` package can be added to a project by running:
 go get cattlecloud.net/go/forms@latest
 ```
 
+```go
+import "cattlecloud.net/go/forms"
+```
+
+### Examples
+
+##### parsing http request
+
+```go
+var (
+  name string
+  age  int
+)
+
+err := forms.Parse(request, forms.Schema{
+  "NAME": forms.String(&name),
+  "AGE":  forms.Int(&age),
+})
+```
+
+##### about requests
+
+Typically the HTTP request will be given to you in the form of an http handler,
+e.g.
+
+```go
+func(w http.ResponseWriter, r *http.Request) {
+  _ = r.ParseForm()
+  // now r form data is available to parse
+}
+```
+
 ### License
 
 The `cattlecloud.net/go/forms` module is open source under the [BSD](LICENSE) license.

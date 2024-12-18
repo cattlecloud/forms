@@ -1,9 +1,9 @@
 // Copyright (c) CattleCloud LLC
 // SPDX-License-Identifier: BSD-3-Clause
 
-// Package formdata provides a way to safely and conveniently extract html Form
+// Package forms provides a way to safely and conveniently extract html Form
 // data using a definied schema.
-package formdata
+package forms
 
 import (
 	"errors"
