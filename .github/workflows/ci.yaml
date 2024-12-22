@@ -27,12 +27,11 @@ jobs:
         with:
           go-version-file: go.mod
           cache-dependency-path: '**/go.sum'
-      - uses: golangci/golangci-lint-action@v6
-        with:
-          version: v1.62.2
-          skip-cache: true
-          args: --config .github/workflows/scripts/golangci.yaml
+      - name: Show System
+        run: |
+          uname -a
+          just sysinfo
       - name: Run Go Test
         run: |
-          just test
+          just init tidy lint test
 
