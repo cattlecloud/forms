@@ -19,6 +19,7 @@ jobs:
           copywrite --config .github/workflows/scripts/copywrite.hcl \
             headers --spdx "BSD-3-Clause" --plan
   run-tests:
+    timeout-minutes: 5
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
