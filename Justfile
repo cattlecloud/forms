@@ -33,7 +33,7 @@ vet:
 # apply golangci-lint linters on source tree
 [group('lint')]
 lint: vet
-    $GOBIN/golangci-lint run --config .github/workflows/scripts/golangci.yaml
+    $GOBIN/golangci-lint run --config {{scripts}}/golangci.yaml
 
 # show host system information
 [group('build')]
