@@ -247,6 +247,21 @@ func Test_Parse_float_malformed(t *testing.T) {
 	must.Error(t, err)
 }
 
+func Test_Parse_Bool_checkbox_on(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"checkbox": []string{"on"},
+	}
+
+	var cb bool
+	err := ParseValues(data, Schema{
+		"checkbox": Bool(&cb),
+	})
+	must.NoError(t, err)
+	must.True(t, cb)
+}
+
 func Test_Parse_bool_value_missing(t *testing.T) {
 	t.Parallel()
 

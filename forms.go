@@ -251,6 +251,9 @@ func BoolOr(b *bool, alt bool) Parser {
 }
 
 func (p *boolParser) Parse(values []string) error {
+	var b bool
+	var err error
+
 	switch {
 	case len(values) > 1:
 		return ErrMulitpleValues
@@ -258,13 +261,13 @@ func (p *boolParser) Parse(values []string) error {
 		return ErrNoValue
 	case len(values) == 0:
 		return nil
-	}
-
-	b, err := strconv.ParseBool(values[0])
-	if err != nil {
-		return err
+	case values[0] == "on":
+		// HTML checkbox uses "on" to indicate checked
+		b = true
+	default:
+		b, err = strconv.ParseBool(values[0])
 	}
 
 	*p.destination = b
-	return nil
+	return err
 }
