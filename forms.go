@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	"github.com/shoenig/go-conceal"
+	"github.com/shoenig/lang"
 )
 
 var (
@@ -100,6 +101,31 @@ func StringOr[T StringType](s *T, alt T) Parser {
 	*s = alt
 	return &stringParser[T]{
 		required:    false,
+		destination: s,
+	}
+}
+
+type stringsParser[T StringType] struct {
+	required    bool
+	destination *[]T
+}
+
+func (p *stringsParser[T]) Parse(values []string) error {
+	switch {
+	case len(values) == 0 && p.required:
+		return ErrNoValue
+	case len(values) == 0:
+		return nil
+	default:
+		*p.destination = lang.Map(values, func(s string) T { return T(s) })
+	}
+	return nil
+}
+
+// Strings is used to extract a form data value into a slice of Go strings.
+func Strings[T StringType](s *[]T) Parser {
+	return &stringsParser[T]{
+		required:    true,
 		destination: s,
 	}
 }

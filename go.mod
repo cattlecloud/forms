@@ -4,6 +4,7 @@ go 1.23
 
 require (
 	github.com/shoenig/go-conceal v0.5.4
+	github.com/shoenig/lang v0.0.6
 	github.com/shoenig/test v1.12.2
 )
 

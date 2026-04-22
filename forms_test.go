@@ -363,3 +363,19 @@ func Test_Parse_IntType_IntOr(t *testing.T) {
 	must.NoError(t, err)
 	must.Eq(t, 100, age)
 }
+
+func Test_Parse_StringType_Strings(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"names": []string{"alice", "bob", "carol"},
+	}
+
+	var names []string
+
+	err := ParseValues(data, Schema{
+		"names": Strings(&names),
+	})
+	must.NoError(t, err)
+	must.Eq(t, []string{"alice", "bob", "carol"}, names)
+}

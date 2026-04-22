@@ -24,13 +24,19 @@ import "cattlecloud.net/go/forms"
 
 ```go
 var (
-  name string
-  age  int
+  name     string
+  age      int
+  aliases  []string
+  worth    float64
+  password *conceal.Text
 )
 
 err := forms.Parse(request, forms.Schema{
-  "NAME": forms.String(&name),
-  "AGE":  forms.Int(&age),
+  "name":     forms.String(&name),
+  "age":      forms.Int(&age),
+  "aliases":  forms.Strings(&aliases),
+  "worth":    forms.Float64(&worth),
+  "password": forms.Secret(&pword),
 })
 ```
 
