@@ -364,7 +364,7 @@ func Test_Parse_IntType_IntOr(t *testing.T) {
 	must.Eq(t, 100, age)
 }
 
-func Test_Parse_StringType_Strings(t *testing.T) {
+func Test_Parse_StringType_Strings_present(t *testing.T) {
 	t.Parallel()
 
 	data := url.Values{
@@ -378,4 +378,51 @@ func Test_Parse_StringType_Strings(t *testing.T) {
 	})
 	must.NoError(t, err)
 	must.Eq(t, []string{"alice", "bob", "carol"}, names)
+}
+
+func Test_Parse_StringType_Strings_missing(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"names": []string{"alice", "bob", "carol"},
+	}
+
+	var jobs []string
+
+	err := ParseValues(data, Schema{
+		"jobs": Strings(&jobs),
+	})
+	must.Error(t, err)
+}
+
+func Test_Parse_StringType_StringsOr_present(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"names": []string{"alice", "bob", "carol"},
+	}
+
+	var names []string
+
+	err := ParseValues(data, Schema{
+		"names": StringsOr(&names, []string{"zed", "yulia"}),
+	})
+	must.NoError(t, err)
+	must.Eq(t, []string{"alice", "bob", "carol"}, names)
+}
+
+func Test_Parse_StringType_StringsOr_missing(t *testing.T) {
+	t.Parallel()
+
+	data := url.Values{
+		"names": []string{"alice", "bob", "carol"},
+	}
+
+	var jobs []string
+
+	err := ParseValues(data, Schema{
+		"jobs": StringsOr(&jobs, []string{"janitor", "cashier"}),
+	})
+	must.NoError(t, err)
+	must.Eq(t, []string{"janitor", "cashier"}, jobs)
 }
