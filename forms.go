@@ -123,9 +123,22 @@ func (p *stringsParser[T]) Parse(values []string) error {
 }
 
 // Strings is used to extract a form data value into a slice of Go strings.
+//
+// If the form value is missing, then an error is returned during parsing.
 func Strings[T StringType](s *[]T) Parser {
 	return &stringsParser[T]{
 		required:    true,
+		destination: s,
+	}
+}
+
+// StringsOr is used to extract multiple form values for a given key into a slice of Go strings.
+//
+// If the form value is missing, then the given alt value is used instead.
+func StringsOr[T StringType](s *[]T, alt []T) Parser {
+	*s = alt
+	return &stringsParser[T]{
+		required:    false,
 		destination: s,
 	}
 }
