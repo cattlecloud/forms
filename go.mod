@@ -1,10 +1,10 @@
 module cattlecloud.net/go/forms
 
-go 1.23
+go 1.26
 
 require (
-	github.com/shoenig/go-conceal v0.5.4
-	github.com/shoenig/lang v0.0.6
+	github.com/shoenig/go-conceal v0.5.6
+	github.com/shoenig/lang v0.0.7
 	github.com/shoenig/test v1.12.2
 )
 
