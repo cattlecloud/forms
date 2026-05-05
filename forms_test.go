@@ -13,6 +13,69 @@ import (
 	"github.com/shoenig/test/must"
 )
 
+func Test_MustParse(t *testing.T) {
+	t.Parallel()
+
+	request, err := http.NewRequestWithContext(
+		t.Context(), http.MethodPost, "/", nil,
+	)
+	must.NoError(t, err)
+
+	request.PostForm = make(url.Values)
+	request.PostForm.Set("one", "1")
+	request.PostForm.Set("two", "2")
+	request.PostForm.Set("three", "3.1")
+	request.PostForm.Set("four", "true")
+
+	var (
+		one   string
+		two   int
+		three float64
+		four  bool
+	)
+
+	MustParse(request, Schema{
+		"one":   String(&one),
+		"two":   Int(&two),
+		"three": Float(&three),
+		"four":  Bool(&four),
+	})
+	must.Eq(t, "1", one)
+	must.Eq(t, 2, two)
+	must.Eq(t, 3.1, three)
+	must.True(t, four)
+}
+
+func Test_MustParse_panic(t *testing.T) {
+	t.Parallel()
+
+	request, err := http.NewRequestWithContext(
+		t.Context(), http.MethodPost, "/", nil,
+	)
+	must.NoError(t, err)
+
+	request.PostForm = make(url.Values)
+	request.PostForm.Set("one", "1")
+	request.PostForm.Set("three", "3.1")
+	request.PostForm.Set("four", "true")
+
+	var (
+		one   string
+		two   int
+		three float64
+		four  bool
+	)
+
+	must.Panic(t, func() {
+		MustParse(request, Schema{
+			"one":   String(&one),
+			"two":   Int(&two),
+			"three": Float(&three),
+			"four":  Bool(&four),
+		})
+	})
+}
+
 func Test_Parse_singles(t *testing.T) {
 	t.Parallel()
 

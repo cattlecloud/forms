@@ -25,6 +25,19 @@ var (
 
 // Parse uses the given Schema to parse the HTTP form values in the given HTTP
 // Request. If the values of the form do not match the schema, or required values
+// are missing, a panic is triggered.
+func MustParse(r *http.Request, schema Schema) {
+	if err := r.ParseForm(); err != nil {
+		panic("forms: " + err.Error())
+	}
+
+	if err := ParseValues(r.Form, schema); err != nil {
+		panic("forms: " + err.Error())
+	}
+}
+
+// Parse uses the given Schema to parse the HTTP form values in the given HTTP
+// Request. If the values of the form do not match the schema, or required values
 // are missing, an error is returned.
 func Parse(r *http.Request, schema Schema) error {
 	if err := r.ParseForm(); err != nil {
